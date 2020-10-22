@@ -1,0 +1,58 @@
+server:
+  port: 8082
+
+spring:
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          issuer-uri: https://id.matejbucek.cz/auth/realms/PurkiadaAPI
+          jwk-set-uri: https://id.matejbucek.cz/auth/realms/PurkiadaAPI/protocol/openid-connect/certs
+      client:
+        provider:
+          keycloak:
+            issuer-uri: https://id.matejbucek.cz/auth/realms/PurkiadaAPI
+            user-name-attribute: preferred_username
+        registration:
+          keycloak:
+            client-id: spring-gateway
+            client-secret: 
+  cloud:
+    gateway:
+      routes:
+      - id: admin
+        uri: lb://PURKIADA-ADMIN
+        predicates:
+        - Path=/services/**,/sso/**
+#      - id: asdf
+#        uri: http://localhost:8083
+#        predicates:
+#        - Path=/sso/**
+      - id: api
+        uri: lb://PURKIADA-API
+        predicates:
+        - Path=/v1.0/**
+      - id: client
+        uri: http://localhost:4200
+        predicates:
+        - Path=/**
+      x-forwarded:
+        for-enabled: true
+        proto-enabled: true
+  application:
+    name: PURKIADA-GATEWAY
+management:
+  endpoints:
+    web:
+      exposure:
+        include: "*"
+  endpoint:
+    health:
+      show-details: always
+      enabled: true
+eureka:
+  client:
+    service-url:
+      defaultZone: http://localhost:8761/eureka
+    healthcheck:
+      enabled: true
