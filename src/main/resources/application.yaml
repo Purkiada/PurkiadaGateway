@@ -6,17 +6,17 @@ spring:
     oauth2:
       resourceserver:
         jwt:
-          issuer-uri: https://id.matejbucek.cz/auth/realms/PurkiadaAPI
-          jwk-set-uri: https://id.matejbucek.cz/auth/realms/PurkiadaAPI/protocol/openid-connect/certs
+          issuer-uri: ${OAUTH_SERVER:https://id.matejbucek.cz/}
+          jwk-set-uri: ${OAUTH_KEYSET:https://id.matejbucek.cz/}
       client:
         provider:
           keycloak:
-            issuer-uri: https://id.matejbucek.cz/auth/realms/PurkiadaAPI
+            issuer-uri: ${OAUTH_SERVER:https://id.matejbucek.cz/}
             user-name-attribute: preferred_username
         registration:
           keycloak:
-            client-id: spring-gateway
-            client-secret: 
+            client-id: ${OAUTH_ID:id}
+            client-secret: ${OAUTH_SECRET:secret}
   cloud:
     gateway:
       routes:
@@ -33,7 +33,7 @@ spring:
         predicates:
         - Path=/v1.0/**
       - id: client
-        uri: http://localhost:4200
+        uri: http://${GW_FRONTEND}/
         predicates:
         - Path=/**
       x-forwarded:
@@ -53,6 +53,6 @@ management:
 eureka:
   client:
     service-url:
-      defaultZone: http://localhost:8761/eureka
+      defaultZone: http://${EUREKA_ADDR:localhost}:8761/eureka
     healthcheck:
       enabled: true
